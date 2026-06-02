@@ -1,98 +1,58 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { db } from "@/firebase/firebaseConfig";
+import { router } from "expo-router";
+import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function Home(){
+  const [vagas, setVagas] = useState<any[]>([]);
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  async function carregarVagas() {
+    const snapshot = await getDocs(collection(db, "vagas"));
+    const lista: any = [];
+    snapshot.forEach((doc) => {
+      lista.push({ id: doc.id, ...doc.data() });
+    });
+    setVagas(lista);
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  useEffect(() => { carregarVagas() }, []);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Vagas</Text>
+      
+      {/* Seu botão estilizado aqui */}
+      <TouchableOpacity style={styles.botao} onPress={() => router.push('/cadastro')}>
+        <Text style={styles.textoBotao}>Cadastrar vaga</Text>
+      </TouchableOpacity>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <FlatList 
+        data={vagas}
+        keyExtractor={(item) => item.id}
+        renderItem={({item}) => (
+          <View style={styles.card}>
+            <Text style={styles.cargo}>{item.cargo}</Text>
+            <Text style={styles.empresa}>{item.empresa}</Text>
+            <Text style={styles.salario}>R$ {item.salario}</Text>  
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  titulo: { fontSize: 24, fontWeight: "bold", marginBottom: 15 },
+  
+  // O botão simples de 3 linhas
+  botao: { backgroundColor: "#0400ff", padding: 14, borderRadius: 8, alignItems: "center", marginBottom: 20 },
+  textoBotao: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+
+  // Lista de vagas bonitinha
+  card: { borderWidth: 1, borderColor: "#e0e0e0", padding: 15, marginBottom: 10, borderRadius: 8 },
+  cargo: { fontSize: 18, fontWeight: "bold" },
+  empresa: { color: "#666", marginVertical: 3 },
+  salario: { color: "#00b050", fontWeight: "bold" }
 });
