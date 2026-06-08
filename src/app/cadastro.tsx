@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { db } from "../firebase/firebaseConfig";
+import { auth, db } from "../firebase/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
+import { router } from "expo-router";
 
 export default function Cadastro(){
 
     const [cargo,setCargo] = useState('')
     const [empresa,setEmpresa] = useState('')
     const [salario,setSalario] = useState('')
+
+    useEffect(()=>{
+        const unsubscribe = auth.onAuthStateChanged((user)=>{
+            if(!user){
+                router.replace("/login")
+            }
+        })
+        return unsubscribe
+    },[])
 
     async function salvarVaga() {
         await addDoc(
@@ -43,22 +53,56 @@ export default function Cadastro(){
             style={styles.input}
             />
             <TouchableOpacity onPress={salvarVaga} style={styles.botao}>
-                <Text>Salvar</Text>
+                <Text style={styles.textoBotao}>Salvar</Text>
             </TouchableOpacity>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    container:{
+        flex:1,
+        backgroundColor:"#f4f6f6",
+        justifyContent:"center",
+        padding:20
+    },
+    card:{
+        backgroundColor:"#fff",
+        padding:25,
+        borderRadius:20,
+        shadowColor:"#000",
+        shadowOffset:{
+            width:0,
+            height:4
+        }
+    },
+    titulo:{
+        fontSize:28,
+        fontWeight:"bold",
+        textAlign:"center",
+        color:"#272acf",
+        marginTop:25
+    },
     input:{
+        height:55,
         borderWidth:1,
-        padding:10,
-        margin:5
+        borderColor:"#ddd",
+        borderRadius:12,
+        paddingHorizontal:15,
+        backgroundColor:"#fafafa",
+        marginBottom:15,
+        fontSize:16
     },
     botao:{
-        backgroundColor:"#00c3ff",
-        borderRadius:8,
+        backgroundColor:"#272acf",
+        borderRadius:12,
         padding:16,
-        alignItems: "center"
+        alignItems: "center",
+        marginTop:10
+    },
+    textoBotao:{
+        color:"#fff",
+        fontSize:18,
+        fontWeight:"bold"
     }
 })

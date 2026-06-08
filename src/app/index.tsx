@@ -11,6 +11,6 @@ export default function Index(){
         router.replace("/login")
       }
     })
-    return
-  })
+    return unsubscribe
+  },[])
 }

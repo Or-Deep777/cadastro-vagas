@@ -5,13 +5,6 @@ import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-
-/*interface Usuario {
-    nome: string
-    email: string
-    senha: string
-}*/
-
 export default function CadastroUsuario(){
 
     const [nome,setNome] = useState('')
